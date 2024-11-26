@@ -10,7 +10,13 @@
   },
   "dependencies": {
     "@speckle/viewer": "2.20.1",
-    "tweakpane": "^3.0.8"
+    "tweakpane": "^4.0.3",
+    "three.js": "0.77.1",
+    "firebase": "10.13.1",
+    "axios": "1.7.7",
+    "@maptiler/sdk": "2.2.2",
+    "dotenv": "16.4.5",
+    "pino": "9.4.0"
   },
   "devDependencies": {
     "@types/spin.js": "^3.0.0",

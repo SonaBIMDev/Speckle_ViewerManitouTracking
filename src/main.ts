@@ -20,8 +20,9 @@ import {
 } from '@speckle/viewer';
 
 //import { makeMeasurementsUI } from './MeasurementsUI'; // Interface utilisateur pour les mesures
-import { Box3 } from 'three'; // Utilisé pour gérer des boîtes englobantes en 3D
+//import { Box3 } from 'three'; // Utilisé pour gérer des boîtes englobantes en 3D
 import { Pane } from 'tweakpane'; // Bibliothèque pour créer une interface utilisateur (boutons, menus, etc.)
+
 import { MoveExtended } from './MoveExtended';
 // Or import only the bits you need
 import * as maptilersdk from '@maptiler/sdk';
@@ -55,11 +56,11 @@ interface Param {
   speckletype: string;
 }
 
-let refreshIntervalId = null; // Variable pour stocker l'ID de l'intervalle
+let refreshIntervalId : number; // Variable pour stocker l'ID de l'intervalle
 let refreshBlade = null; // Déclarez refreshBlade ici pour qu'il soit accessible globalement
 let gpsFollow = null;
 let supportBlade = null;
-let folderCoordinates = null;
+let folderCoordinates = null; // Déclarer explicitement le type de la variable = null;
 
 let btnUrlDoc = null;
 let btnUrlPano = null;
@@ -82,6 +83,29 @@ let _treeNodeSelected: TreeNode | null = null;
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateImage(''); // Masque le conteneur d'image au démarrage
+});
+
+// Fonction pour mettre à jour l'image
+function updateImage(imageUrl: string) {
+  const imagePreview = document.getElementById('image-preview');
+  if (!imagePreview) return;
+
+  imagePreview.innerHTML = ''; // Clear previous content
+
+  if (imageUrl) {
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = 'Preview';
+    imagePreview.appendChild(img);
+    imagePreview.style.display = 'block';
+  } else {
+    imagePreview.style.display = 'none';
+  }
+}
+
 
 async function main() {
   /** Get the HTML container */
@@ -219,25 +243,27 @@ async function main() {
     container: document.getElementById('tweakpane-container'),
   });
 
-  const folderTools = pane.addFolder({
+  const folderTools = (pane as any).addFolder({
     title: 'Tools',
     expanded: true,
   });
 
-  pane.addBlade({
+  (pane as any)
+  .addBlade({
     view: 'separator',
   });
 
-  folderCoordinates = pane.addFolder({
+  folderCoordinates = (pane as any).addFolder({
     title: 'Support informations',
     expanded: true,
   });
 
-  pane.addBlade({
+  (pane as any)
+    .addBlade({
     view: 'separator',
   });
 
-  const folderMesurements = pane.addFolder({
+  const folderMesurements = (pane as any).addFolder({
     title: 'Mesurements',
     expanded: false,
   });
@@ -423,24 +449,7 @@ async function main() {
     supportBlade.options = options;
     supportBlade.value = options.length > 0 ? options[0].value : ''; // Sélectionner le premier élément par défaut
 
-    // Fonction pour mettre à jour l'image
-    function updateImage(imageUrl: string) {
-      const imagePreview = document.getElementById('image-preview');
-      if (!imagePreview) return;
-
-      imagePreview.innerHTML = ''; // Clear previous content
-
-      if (imageUrl) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = 'Preview';
-        imagePreview.appendChild(img);
-        imagePreview.style.display = 'block';
-      } else {
-        imagePreview.style.display = 'none';
-      }
-    }
-
+    
     supportBlade.on('change', async (ev: { value: any }) => {
       // Gérer le changement dans la liste déroulante
 
@@ -753,7 +762,7 @@ async function main() {
       canvas.width = image.width;
       canvas.height = image.height;
       const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0);
+      context!.drawImage(image, 0, 0);
 
       // Convertir le canvas en Blob
       canvas.toBlob(async (blob) => {
@@ -1340,7 +1349,7 @@ async function main() {
 
   // Fonction pour démarrer l'exécution périodique
   function startFunctionWithInterval() {
-    const refreshTime = refreshBlade.value; // Récupérer la valeur actuelle de Refresh time
+    const refreshTime = parseInt(refreshBlade.value, 10); // Assurez-vous que refreshBlade.value est traité comme un nombre
 
     refreshIntervalId = setInterval(() => {
       console.log(
@@ -1351,7 +1360,7 @@ async function main() {
 
       // Placez ici la logique de la fonction à exécuter
       GetGPSCoordinatesFromFirebase();
-    }, refreshTime);
+    }, refreshTime) as unknown as number;
   }
 
   // Fonction pour arrêter l'exécution périodique
@@ -1400,8 +1409,10 @@ async function main() {
           { sourceCrs: 4326, targetCrs: 3947 }
         );
         const results = projectedCoords.results[0];
-        const x_transformed = results.x.toFixed(3);
-        const y_transformed = results.y.toFixed(3);
+        
+        const x_transformed = (results.x ?? 0).toFixed(3);
+        const y_transformed = (results.y ?? 0).toFixed(3); // Utilise 0 si results.y est undefined
+        
 
         /* ON NE RECUPERE PAS LE Z CAR 
         LA TOPO FROM GEOPORTAIL OU AUTRE NE CORRESPOND PAS A CELLE APRES CHANTIER
@@ -1415,9 +1426,9 @@ async function main() {
         const z_transformed = dz.toFixed(3);
 
         // Effectuer les soustractions
-        const x_final = (x_transformed - dx).toFixed(3);
-        const y_final = (y_transformed - dy).toFixed(3);
-        const z_final = (z_transformed - dz).toFixed(3);
+        const x_final = (parseFloat(x_transformed) - dx).toFixed(3);
+        const y_final = (parseFloat(y_transformed) - dy).toFixed(3);
+        const z_final = (parseFloat(z_transformed) - dz).toFixed(3);
 
         console.log(
           'Coordonnées point de base Revit : x ',
@@ -1429,9 +1440,9 @@ async function main() {
         );
 
         //mise à jour des nouvelles coordonnées dans le Pane
-        REVIT_COORDINATES.x = x_final;
-        REVIT_COORDINATES.y = y_final;
-        REVIT_COORDINATES.z = z_final;
+        REVIT_COORDINATES.x = parseFloat(x_final);
+        REVIT_COORDINATES.y = parseFloat(y_final);
+        REVIT_COORDINATES.z = parseFloat(z_final);
 
         _xRevitGPS.refresh();
         _yRevitGPS.refresh();

@@ -49,17 +49,35 @@ html {
   width: 250px; /* Ajustez selon vos besoins */
 }
 
+#content-container {
+  display: flex;
+  flex-direction: column; /* Organisation verticale : logo au-dessus */
+  align-items: center;    /* Centrer les éléments horizontalement */
+  margin-top: 20px;       /* Ajouter de l'espace au-dessus si nécessaire */
+}
+
+#manitou-logo {
+  position: absolute; /* Permet de positionner l'élément par rapport à la fenêtre */
+  top: 20px;          /* Distance depuis le haut */
+  left: 20px;         /* Distance depuis la gauche */
+  z-index: 1000;      /* S'assure que le logo est au-dessus des autres éléments */
+}
+
+#manitou-logo img {
+  max-width: 150px;  /* Taille maximale du logo */
+  height: auto;      /* Garde les proportions */
+}
+
 #image-preview {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 100px;
-  height: 100px;
-  overflow: hidden;
-  z-index: 2;
-  background: none; /* Enlever la couleur de fond */
-  border: none; /* Supprimer toute bordure */
-  display: none; /* Cacher l'élément par défaut */
+  position: absolute; /* Permet de positionner l'élément par rapport à la fenêtre */
+  display: none;         /* Masque complètement le conteneur */
+  margin: 80px 20px 20px; /* Ajoute un espace en haut pour laisser de la place au logo MANITOU */
+  width: 200px;           /* Largeur fixe (modifiez selon vos besoins) */
+  height: 200px;          /* Hauteur fixe */  
+  display: flex;
+  justify-content: center;
+  align-items: center;    /* Centrage du contenu de l'aperçu */
+  overflow: hidden;       /* Empêche les débordements de contenu */
 }
 
 #image-preview img {

@@ -52,14 +52,15 @@ import {
       console.groupEnd();
   
       /** Get the render views */
-      const renderTree = this.viewer.getWorldTree().getRenderTree();
-      const rvs: NodeRenderView =
-        renderTree.getRenderViewsForNode(targetTreeNode);
-  
+      const renderTree = this.viewer.getWorldTree().getRenderTree();      
+      const rvs: NodeRenderView[] = renderTree.getRenderViewsForNode(targetTreeNode);
+
+      /** Get the batch objects which we'll animate */
       /** Get the batch objects which we'll animate */
       const objects = rvs
-        .map((rv: NodeRenderView) => this.viewer.getRenderer().getObject(rv))
-        .filter((obj: BatchObject) => obj !== null);
+      .map((rv: NodeRenderView) => this.viewer.getRenderer().getObject(rv))
+      .filter((obj): obj is BatchObject => obj !== null && obj !== undefined);
+
   
       //console.log("Move at", targetVector);
   
